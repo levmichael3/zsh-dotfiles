@@ -1,0 +1,50 @@
+# Safety pre-commit hooks for dotfiles
+repos:
+  # Detect secrets/credentials
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v0.14.1
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: '.-secrets.baseline'
+
+  # Prevent large files
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        args: ['--markdown-line-length-ext', 'md']
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-json
+      - id: debug-statements
+      - id: mixed-line-ending
+
+  # Prevent secrets in aws/credentials files
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: aws-credentials
+        name: Check for AWS credentials
+        description: Prevents committing AWS credentials
+        entry: aws-credentials-hook
+        language: system
+        stages: [pre-commit]
+        files: ''
+        pass_filenames: false
+        stages: [commit, push]
+
+  # Shell script linting
+  - repo: https://github.com/liquidata/pre-commit-mirrors-shellcheck
+    rev: v0.9.0
+    hooks:
+      - id: shellcheck
+        types: [shell]
+        args: ['--severity=error']
+
+default_language_version:
+  python: python3
