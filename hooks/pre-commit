@@ -1,0 +1,44 @@
+#!/bin/zsh
+# Safety pre-commit hook for dotfiles
+
+echo "🔒 Running safety checks..."
+
+# Check for secrets in common files (exclude this hook file)
+for file in $(git diff --cached --name-only --diff-filter=ACM | grep -v "^hooks/"); do
+    # Check for AWS keys
+    if grep -iq "aws.*secret" "$file" 2>/dev/null; then
+        echo "❌ ERROR: Possible AWS secret found in $file"
+        exit 1
+    fi
+    
+    # Check for private keys
+    if grep -iq "PRIVATE KEY" "$file" 2>/dev/null; then
+        echo "❌ ERROR: Private key found in $file"
+        exit 1
+    fi
+    
+    # Check for password patterns
+    if grep -iq "password\s*=\s*['\"]" "$file" 2>/dev/null; then
+        echo "⚠️  WARNING: Possible password found in $file"
+    fi
+done
+
+# Check for large files (>1MB)
+for file in $(git diff --cached --name-only --diff-filter=ACM); do
+    size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
+    if [ "$size" -gt 1048576 ]; then
+        echo "❌ ERROR: Large file detected: $file ($(($size/1024/1024))MB)"
+        exit 1
+    fi
+done
+
+# Check for merge conflicts
+for file in $(git diff --cached --name-only --diff-filter=ACM); do
+    if grep -iq "<<<<<<< HEAD" "$file" 2>/dev/null; then
+        echo "❌ ERROR: Unresolved merge conflict in $file"
+        exit 1
+    fi
+done
+
+echo "✅ Safety checks passed!"
+exit 0

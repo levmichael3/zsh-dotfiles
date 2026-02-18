@@ -1,0 +1,19 @@
+#!/bin/zsh
+# Prepare commit message hook - add changed files info
+
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+SHA1=$3
+
+# Only add file list for new commits (not amend/reword)
+if [ "$COMMIT_SOURCE" = "" ]; then
+    # Get list of changed files
+    changed_files=$(git diff --cached --name-only --diff-filter=ACM | head -20)
+    
+    # Append to commit message
+    echo "" >> "$COMMIT_MSG_FILE"
+    echo "Changed files:" >> "$COMMIT_MSG_FILE"
+    echo "$changed_files" >> "$COMMIT_MSG_FILE"
+fi
+
+exit 0

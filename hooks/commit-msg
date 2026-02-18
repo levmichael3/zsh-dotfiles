@@ -1,0 +1,13 @@
+#!/bin/zsh
+# Commit message hook
+
+msg=$(cat "$1")
+min_len=10
+
+if [ ${#msg} -lt $min_len ]; then
+    echo "❌ Commit message too short (minimum $min_len characters)"
+    exit 1
+fi
+
+echo "✅ Commit message OK"
+exit 0

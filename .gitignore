@@ -14,5 +14,5 @@ venv/
 ENV/
 env/
 
-# Git hooks
+# Git hooks (use hooks/ directory for tracked hooks)
 .git/hooks/
